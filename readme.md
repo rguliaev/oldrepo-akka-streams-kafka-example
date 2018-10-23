@@ -1,0 +1,1 @@
+This is a demo project with Akka-Streams and Kafka
