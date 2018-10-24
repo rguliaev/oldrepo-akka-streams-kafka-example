@@ -1,6 +1,6 @@
 package models
 
-import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 import io.circe._
@@ -14,8 +14,8 @@ object TimeFormatter {
 
 trait IncomingChunk {
   val `type`: String
-  val time: LocalDate
-  def id = `type`+ time.toEpochDay
+  val time: LocalDateTime
+  def id = `type`+ "-" + time.format(datetimeFormat)
 }
 
 object IncomingChunk {
@@ -29,7 +29,7 @@ object IncomingChunk {
       c.downField("type").as[String].toOption match {
         case Some("PRICE") =>
           for {
-            time <- c.downField("time").as[LocalDate](Decoder.decodeLocalDateWithFormatter(datetimeFormat))
+            time <- c.downField("time").as[LocalDateTime](Decoder.decodeLocalDateTimeWithFormatter(datetimeFormat))
             bids <- c.downField("bids").as[List[PriceData]]
             asks <- c.downField("asks").as[List[PriceData]]
             closeoutBid <- c.downField("closeoutBid").as[BigDecimal]
@@ -42,7 +42,7 @@ object IncomingChunk {
           }
         case Some("HEARTBEAT") =>
           for {
-            time <- c.downField("time").as[LocalDate](Decoder.decodeLocalDateWithFormatter(datetimeFormat))
+            time <- c.downField("time").as[LocalDateTime](Decoder.decodeLocalDateTimeWithFormatter(datetimeFormat))
           } yield {
             HeartBeatChunk("HEARTBEAT", time)
           }
@@ -55,7 +55,7 @@ object IncomingChunk {
 case class PriceData(price: BigDecimal, liquidity: Long)
 case class PriceChunk(
   `type`: String,
-  time: LocalDate,
+  time: LocalDateTime,
   bids: List[PriceData],
   asks: List[PriceData],
   closeoutBid: BigDecimal,
@@ -64,4 +64,4 @@ case class PriceChunk(
   tradeable: Boolean,
   instrument: String) extends IncomingChunk
 
-case class HeartBeatChunk(`type`: String, time: LocalDate) extends IncomingChunk
+case class HeartBeatChunk(`type`: String, time: LocalDateTime) extends IncomingChunk

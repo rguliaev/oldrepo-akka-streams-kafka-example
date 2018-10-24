@@ -1,14 +1,12 @@
 package stream
 
 import java.nio.charset.StandardCharsets
-import actors.KafkaPublisherActor
 import akka.Done
-import akka.actor.{ActorSystem, Props}
+import akka.actor.ActorSystem
 import akka.http.javadsl.model.headers.HttpCredentials
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.{HttpMethods, HttpRequest, Uri}
 import akka.http.scaladsl.model.Uri.Query
-import akka.kafka.ProducerMessage.MultiResultPart
 import akka.kafka.scaladsl.Producer
 import akka.kafka.{ProducerMessage, ProducerSettings}
 import akka.stream.{KillSwitches, Materializer, UniqueKillSwitch}
@@ -27,7 +25,6 @@ class OandaStreamConnector(appConfig: AppConfig, instrument: Instrument)
                           (implicit system: ActorSystem, ec: ExecutionContext, mat: Materializer) extends LazyLogging {
 
   val url = s"${appConfig.oandaConfig.endpoint}/v3/accounts/${appConfig.oandaConfig.accountId}/pricing/stream"
-  val kafkaProducer = system.actorOf(Props(new KafkaPublisherActor()))
 
   val producerSettings = ProducerSettings(appConfig.producerConfig, new StringSerializer, new StringSerializer)
     .withBootstrapServers(appConfig.kafkaConfig.toString)
@@ -65,15 +62,8 @@ class OandaStreamConnector(appConfig: AppConfig, instrument: Instrument)
         messagesList,
         messagesList.size
       )
-    }.via(Producer.flexiFlow(producerSettings))
-      .map {
-        case ProducerMessage.MultiResult(parts, _) =>
-          parts
-            .map {
-              case MultiResultPart(metadata, record) =>
-                s"${metadata.topic}/${metadata.partition} ${metadata.offset}: ${record.value}"
-            }
-            .mkString(", ")
-      }.toMat(Sink.foreach(logger.info(_)))(Keep.both).run
+    }
+    .via(Producer.flexiFlow(producerSettings))
+    .toMat(Sink.ignore)(Keep.both).run
   }
 }
