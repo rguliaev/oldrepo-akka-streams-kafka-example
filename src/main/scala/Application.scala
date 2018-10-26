@@ -19,30 +19,30 @@ object Application extends App with OandaConfigLoader with LazyLogging {
     load match {
       case Success(appConfig) =>
         val (killSwitchEURUSD, streamEURUSD) = new OandaStreamConnector(appConfig, EURUSD).run
-        val (killSwitchGBPUSD, streamGBPUSD)  = new OandaStreamConnector(appConfig, GBPUSD).run
-        val (killSwitchAUDUSD, streamAUDUSD)  = new OandaStreamConnector(appConfig, AUDUSD).run
+        //val (killSwitchGBPUSD, streamGBPUSD)  = new OandaStreamConnector(appConfig, GBPUSD).run
+        //val (killSwitchAUDUSD, streamAUDUSD)  = new OandaStreamConnector(appConfig, AUDUSD).run
 
         val (consumerControlEURUSD, consumerStreamEURUSD) = new KafkaConsumer(appConfig, EURUSD).run
-        val (consumerControlGBPUSD, consumerStreamGBPUSD) = new KafkaConsumer(appConfig, GBPUSD).run
-        val (consumerControlAUDUSD, consumerStreamAUDUSD) = new KafkaConsumer(appConfig, AUDUSD).run
+        //val (consumerControlGBPUSD, consumerStreamGBPUSD) = new KafkaConsumer(appConfig, GBPUSD).run
+        //val (consumerControlAUDUSD, consumerStreamAUDUSD) = new KafkaConsumer(appConfig, AUDUSD).run
 
         sys.addShutdownHook {
           logger.info("Shutting down...")
           consumerControlEURUSD.shutdown()
-          consumerControlGBPUSD.shutdown()
-          consumerControlAUDUSD.shutdown()
+          //consumerControlGBPUSD.shutdown()
+          //consumerControlAUDUSD.shutdown()
 
           killSwitchEURUSD.shutdown()
-          killSwitchGBPUSD.shutdown()
-          killSwitchAUDUSD.shutdown()
+          //killSwitchGBPUSD.shutdown()
+          //killSwitchAUDUSD.shutdown()
 
           val theEnd = for {
             _ <- consumerStreamEURUSD
             _ <- streamEURUSD
-            _ <- consumerStreamGBPUSD
-            _ <- streamGBPUSD
-            _ <- consumerStreamAUDUSD
-            _ <- streamAUDUSD
+           // _ <- consumerStreamGBPUSD
+           // _ <- streamGBPUSD
+           // _ <- consumerStreamAUDUSD
+           // _ <- streamAUDUSD
             _ <- Http().shutdownAllConnectionPools()
             _ <- system.terminate()
           } yield ()

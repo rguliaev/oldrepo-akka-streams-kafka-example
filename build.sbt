@@ -19,6 +19,7 @@ libraryDependencies ++= {
       "org.apache.kafka" %% "kafka" % kafkaVersion,
       "com.typesafe.scala-logging" %% "scala-logging" % "3.9.0",
       "ch.qos.logback" % "logback-classic" % "1.2.3",
+      "org.fusesource.leveldbjni" % "leveldbjni-all" % "1.8",
       "org.scalatest" %% "scalatest" % "3.0.5" % Test,
       "com.typesafe.akka" %% "akka-http-testkit" % akkaHttpVersion % Test
   ) ++

@@ -19,6 +19,9 @@ trait IncomingChunk {
 }
 
 object IncomingChunk {
+
+  implicit val encodeLocalDateTime: Encoder[LocalDateTime] = Encoder.encodeLocalDateTimeWithFormatter(datetimeFormat)
+
   implicit val encoder: Encoder[IncomingChunk] = Encoder.instance {
     case priceChunk @ PriceChunk(_, _, _, _, _, _, _, _, _) => priceChunk.asJson
     case heartBeat @ HeartBeatChunk(_, _) => heartBeat.asJson
