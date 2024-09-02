@@ -1,3 +1,5 @@
+Origin: https://github.com/kormoglaz/akka-streams-kafka-example
+
 This is a demo project with Akka-Streams, Akka-Persistance and Kafka
 
 You should have installed Kafka on machine
